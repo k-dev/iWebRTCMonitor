@@ -13,16 +13,16 @@ One device streams live camera and audio, another watches it. Video goes directl
 - **Reliable, thread-safe networking.** Modern Swift concurrency with clear ownership of every connection, so reconnects and overlapping events do not cause crashes or stuck sessions.
 - **Tested and debugged at a low level.** Automated tests against a local WebSocket server, plus a custom WebRTC build that was used to find and avoid H.264 encoder problems (see [Why a custom WebRTC build](#why-a-custom-webrtc-build)).
 
-<!-- ## Demo on platforms
+## Demo on platforms
 
 ### macOS
 
-![Camera on macOS](Demo/mac_camera.gif)
+![Demo/mac_camera.gif](https://github.com/user-attachments/assets/5dee697f-1321-46f7-9517-fead2f1ec6f3)
 
-![Viewer on macOS](Demo/mac_viewer.gif)
+![Viewer on macOS](https://github.com/user-attachments/assets/f29289dc-d1b9-4811-bc4c-df0d587f1762)
 
 ### iOS
-![iOS](Demo/iphone_both.gif) -->
+![iOS](https://github.com/user-attachments/assets/974734da-91ac-4c3a-b859-7660cd3ea794)
 
 ---
 
