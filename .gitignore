@@ -1,0 +1,39 @@
+#
+# macOS
+#
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+__MACOSX/
+#
+# Xcode
+#
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+timeline.xctimeline
+playground.xcworkspace
+build/
+DerivedData/
+*.xcresult
+*.xcarchive
+#
+# Swift PM
+#
+# Package.resolved
+.build/
+.swiftpm/
+.spm/
+Packages/
+*.swiftpm/xcuserdata/
+#
+# Docker
+#
+docker-compose.override.yml

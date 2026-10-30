@@ -1,0 +1,79 @@
+COMMERCIAL LICENSE
+
+iWebRTCMonitor - P2P WebRTC Based monitor for iOS and macOS
+Copyright (C) 2026 Kyrylo Kormyltsev
+
+This Commercial License applies to the core source code of iWebRTCMonitor
+(the "Software") that is made available by the copyright holder under this
+license.
+
+1. GRANT OF LICENSE
+
+Subject to the terms of this license and any applicable commercial agreement
+with the copyright holder, the copyright holder grants a non-exclusive,
+non-transferable license to use, reproduce, modify, and distribute the
+Software as part of proprietary or closed-source software.
+
+This license permits use of the Software without the copyleft and source-code
+distribution obligations that would otherwise apply under the GNU General
+Public License version 3.0.
+
+2. COMMERCIAL USE
+
+The Software may be incorporated into commercial products and services,
+including proprietary and closed-source applications, and may be distributed
+as part of such products and services.
+
+3. REDISTRIBUTION
+
+The Software may not be redistributed as a standalone source-code product
+under this license.
+
+Recipients of a commercial license may distribute the Software as part of
+their proprietary products and services, subject to the terms of their
+commercial agreement with the copyright holder.
+
+4. COPYRIGHT
+
+The Software and all associated copyrights remain the property of the
+copyright holder.
+
+No ownership of the Software or its copyrights is transferred by this
+license.
+
+5. THIRD-PARTY COMPONENTS
+
+This license applies only to the Software owned by the copyright holder.
+
+Third-party components, including WebRTC, are governed by their respective
+licenses and are not covered by this Commercial License.
+
+6. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR
+THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+7. DUAL LICENSING
+
+The Software is also available under the GNU General Public License version
+3.0 or later, as provided in LICENSE-GPL.txt.
+
+If you are not using the Software under the GPL-3.0-or-later license and wish
+to use it in proprietary or closed-source software, you must obtain a
+commercial license from the copyright holder.
+
+8. CONTACT
+
+For commercial licensing inquiries, contact the copyright holder through the
+contact information provided in the project's README or repository.
+
+---
+
+Copyright (C) 2026 Kyrylo Kormyltsev
+All rights reserved with respect to the rights not expressly granted under
+this license.

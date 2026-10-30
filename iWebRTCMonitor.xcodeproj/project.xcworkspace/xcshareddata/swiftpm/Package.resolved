@@ -1,0 +1,15 @@
+{
+  "originHash" : "01ad3ad18ab6cd09760369d6b177a46dcb94ed8650adfe778a6f02c7eedb0820",
+  "pins" : [
+    {
+      "identity" : "webrtclibrary",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/k-dev/WebRTCLibrary",
+      "state" : {
+        "revision" : "cba9a71e273f9333edd9da3c561810898fc47a74",
+        "version" : "0.1.0-m156"
+      }
+    }
+  ],
+  "version" : 3
+}

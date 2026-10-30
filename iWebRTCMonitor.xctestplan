@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "1CB01181-D8AD-452B-A763-B8AB38CE0E4D",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:iWebRTCMonitor.xcodeproj",
+      "identifier" : "ED5959E12FAF584700BB5FCC",
+      "name" : "iWebRTCMonitor"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:iWebRTCMonitor.xcodeproj",
+        "identifier" : "ED5959EE2FAF584B00BB5FCC",
+        "name" : "iWebRTCMonitorTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "target" : {
+        "containerPath" : "container:iWebRTCMonitor.xcodeproj",
+        "identifier" : "ED5959F82FAF584B00BB5FCC",
+        "name" : "iWebRTCMonitorUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

@@ -1,0 +1,14 @@
+## Licensing
+The core source code of this project is dual-licensed:
+
+1. GNU General Public License v3.0 or later (GPL-3.0-or-later)
+2. Commercial License
+
+You may use the source code under the GPL-3.0-or-later terms, or obtain a
+commercial license from the copyright holder under separate commercial terms.
+
+See LICENSE-GPL.txt for the GPL-3.0-or-later license.
+
+See LICENSE-COMMERCIAL.txt for the commercial licensing terms.
+
+Copyright (C) 2026 Kyrylo Kormyltsev
