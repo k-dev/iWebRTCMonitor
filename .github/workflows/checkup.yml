@@ -1,0 +1,34 @@
+name: Repo check up
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs of the same workflow on the same branch / PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Fast, cheap checks that do not need macOS.
+  hygiene:
+    name: Repo hygiene
+    runs-on: ubuntu-24.04   # pinned: ubuntu-latest is migrating to Ubuntu 26
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: No junk files are tracked
+        run: |
+          junk=$(git ls-files | grep -E '(^|/)(\.DS_Store|__MACOSX|xcuserdata|DerivedData)(/|$)|(^|/)\._' || true)
+          if [ -n "$junk" ]; then
+            echo "These files must not be committed (add them to .gitignore):"
+            echo "$junk"
+            exit 1
+          fi
+
+      - name: docker-compose.yml is valid
+        run: docker compose -f docker-compose.yml config --quiet

@@ -9,12 +9,12 @@
 import Foundation
 import os
 
-func Log(category: Logger.Category = .default, level: Logger.Level = .status, format: StaticString, _ args: Any...) {
-    Logger.default.log(category: category, level: level, format: format, args)
+func Log(logger: Logger = .default, category: Logger.Category = .default, level: Logger.Level = .status, format: StaticString, _ args: Any...) {
+    logger.log(category: category, level: level, format: format, args)
 }
 
-func Log(category: Logger.Category = .default, level: Logger.Level = .status, _ args: Any..., separator: String = " ") {
-    Logger.default.log(category: category, level: level, args.map({"\($0)"}).joined(separator: separator))
+func Log(logger: Logger = .default, category: Logger.Category = .default, level: Logger.Level = .status, _ args: Any..., separator: String = " ") {
+    logger.log(category: category, level: level, args.map({"\($0)"}).joined(separator: separator))
 }
 
 /// Writes diagnostic messages to configured outputs.
@@ -49,7 +49,7 @@ class Logger: @unchecked Sendable {
     }
     
     private let subsystem = Bundle.main.bundleIdentifier ?? "no.bundleId"
-    private let logQueue = DispatchQueue(label: "logger.queue", qos: .background)
+    private let logQueue = DispatchQueue(label: "logger.queue", qos: .utility)
 
 #if DEBUG
     private(set) var level: Level = .debug

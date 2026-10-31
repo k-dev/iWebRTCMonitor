@@ -205,11 +205,17 @@ struct SignalingClientConnectionTests {
         defer { client.disconnect() }
         var disconnected: [String] = []
         var connectedCount = 0
-        client.onConnected = { _ in connectedCount += 1 }
+        // The server sees the handshake before URLSession reports the open to the client.
+        let opened = XCTestExpectation(description: "Client reports the first connection")
+        client.onConnected = { _ in
+            connectedCount += 1
+            opened.fulfill()
+        }
         client.onDisconnected = { _, _ in disconnected.append("original") }
         try client.connect()
         try await server.waitForConnections(1)
-        await drainCallbacks()
+        let openResult = await XCTWaiter.fulfillment(of: [opened], timeout: 5)
+        try #require(openResult == .completed, "Client did not report the connection")
         let original = try #require(client.connection)
         #expect(connectedCount == 1)
 

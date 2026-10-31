@@ -29,8 +29,12 @@ private final class LogEntries: @unchecked Sendable {
 @MainActor
 @Suite(.serialized, .timeLimit(.minutes(1)))
 struct LoggerTests {
-    private func wait(for expectation: XCTestExpectation) async throws {
+    // The iOS host app installs its own Logger.default handler during startup.
+    // Each test owns a logger so app lifecycle events cannot replace its handler.
+    // Logger delivers through a weak reference, so keep it alive until delivery completes.
+    private func wait(for expectation: XCTestExpectation, keeping logger: Logger) async throws {
         let result = await XCTWaiter.fulfillment(of: [expectation], timeout: 5)
+        withExtendedLifetime(logger) {}
         try #require(result == .completed, "The logger did not deliver all expected messages")
     }
 
@@ -40,9 +44,7 @@ struct LoggerTests {
         let entries = LogEntries()
         let delivered = XCTestExpectation(description: "Existing log calls deliver messages")
         delivered.expectedFulfillmentCount = 4
-        let logger = Logger.default
-        let originalHandler = logger.inAppLogHandler
-        defer { logger.inAppLogHandler = originalHandler }
+        let logger = Logger()
 
         let plainMessage = "\(token)|plain"
         let formattedMessage = "logger-test-format-7"
@@ -54,12 +56,12 @@ struct LoggerTests {
             delivered.fulfill()
         }
 
-        Log(level: .warning, token, "plain", separator: "|")
-        Log(level: .error, format: "logger-test-format-%d", 7)
-        Log(token, "default-level")
-        Log(format: "logger-test-status-%d", 9)
+        Log(logger: logger, level: .warning, token, "plain", separator: "|")
+        Log(logger: logger, level: .error, format: "logger-test-format-%d", 7)
+        Log(logger: logger, token, "default-level")
+        Log(logger: logger, format: "logger-test-status-%d", 9)
 
-        try await wait(for: delivered)
+        try await wait(for: delivered, keeping: logger)
         #expect(entries.snapshot() == [
             LogEntry(level: .warning, message: plainMessage),
             LogEntry(level: .error, message: formattedMessage),
@@ -70,7 +72,7 @@ struct LoggerTests {
 
     @Test
     func defaultInAppDestinationAndSeverityFilteringRemainActive() async throws {
-        let logger = Logger.default
+        let logger = Logger()
         #expect(logger.output.contains(.inApp))
 
         let token = UUID().uuidString
@@ -79,8 +81,6 @@ struct LoggerTests {
         let entries = LogEntries()
         let delivered = XCTestExpectation(description: "Accepted levels reach the in-app destination")
         delivered.expectedFulfillmentCount = expectedLevels.count
-        let originalHandler = logger.inAppLogHandler
-        defer { logger.inAppLogHandler = originalHandler }
 
         logger.inAppLogHandler = { _, category, level, message in
             guard message.hasPrefix(token) else { return }
@@ -89,23 +89,21 @@ struct LoggerTests {
         }
 
         for level in levels {
-            Log(level: level, "\(token)-\(level.rawValue)")
+            Log(logger: logger, level: level, "\(token)-\(level.rawValue)")
         }
 
-        try await wait(for: delivered)
+        try await wait(for: delivered, keeping: logger)
         #expect(entries.snapshot().map(\.level) == expectedLevels)
     }
 
     @Test
     func concurrentLoggingDeliversEveryAcceptedMessage() async throws {
-        let logger = Logger.default
+        let logger = Logger()
         let count = 64
         let token = UUID().uuidString
         let entries = LogEntries()
         let delivered = XCTestExpectation(description: "Concurrent messages reach the in-app destination")
         delivered.expectedFulfillmentCount = count
-        let originalHandler = logger.inAppLogHandler
-        defer { logger.inAppLogHandler = originalHandler }
 
         logger.inAppLogHandler = { _, category, level, message in
             guard level == .error, message.hasPrefix(token) else { return }
@@ -115,10 +113,10 @@ struct LoggerTests {
 
         DispatchQueue.concurrentPerform(iterations: count) { index in
             let category: Logger.Category = index.isMultiple(of: 2) ? .default : .loggerTests
-            Log(category: category, level: .error, "\(token)-\(index)")
+            Log(logger: logger, category: category, level: .error, "\(token)-\(index)")
         }
 
-        try await wait(for: delivered)
+        try await wait(for: delivered, keeping: logger)
         let received = Set(entries.snapshot().map(\.message))
         let expected = Set((0..<count).map { "\(token)-\($0)" })
         #expect(received == expected)
@@ -131,12 +129,10 @@ struct LoggerTests {
 
     @Test
     func moduleCategoryReachesBothLoggingOverloads() async throws {
-        let logger = Logger.default
+        let logger = Logger()
         let entries = LogEntries()
         let marker = UUID().uuidString
         let delivered = XCTestExpectation(description: "Category messages precede the marker")
-        let originalHandler = logger.inAppLogHandler
-        defer { logger.inAppLogHandler = originalHandler }
         logger.inAppLogHandler = { _, category, level, message in
             if message == marker { delivered.fulfill() }
             else if category == .loggerTests {
@@ -144,11 +140,11 @@ struct LoggerTests {
             }
         }
 
-        Log(category: .loggerTests, level: .warning, "camera", 7, separator: "|")
-        Log(category: .loggerTests, level: .error, format: "camera-%d", 8)
-        Log(category: .loggerTests, level: .status, format: "camera-ready")
-        Log(level: .error, marker)
-        try await wait(for: delivered)
+        Log(logger: logger, category: .loggerTests, level: .warning, "camera", 7, separator: "|")
+        Log(logger: logger, category: .loggerTests, level: .error, format: "camera-%d", 8)
+        Log(logger: logger, category: .loggerTests, level: .status, format: "camera-ready")
+        Log(logger: logger, level: .error, marker)
+        try await wait(for: delivered, keeping: logger)
 
         #expect(entries.snapshot() == [
             LogEntry(category: .loggerTests, level: .warning, message: "camera|7"),
@@ -175,7 +171,7 @@ struct LoggerTests {
             logger.log(category: category, level: level, format: "literal")
         }
         logger.log(category: .default, level: .error, marker)
-        try await wait(for: delivered)
+        try await wait(for: delivered, keeping: logger)
 
         let accepted: [Logger.Level] = threshold == .debug ? levels : [.error]
         #expect(entries.snapshot() == accepted.flatMap { level in
@@ -204,7 +200,7 @@ struct LoggerTests {
             logger.log(category: category, level: level, "named")
         }
         logger.log(category: .default, level: .error, marker)
-        try await wait(for: delivered)
+        try await wait(for: delivered, keeping: logger)
 
         #if DEBUG
         let accepted = levels

@@ -1,0 +1,55 @@
+name: macOS build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs of the same workflow on the same branch / PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# Project and scheme are named after the repository,
+# so the same workflow works in every clone without edits.
+env:
+  PROJECT: ${{ github.event.repository.name }}.xcodeproj   # repo root = folder that contains the .xcodeproj
+  SCHEME: ${{ github.event.repository.name }}
+  SPM_DIR: .spm                                            # SwiftPM checkout/cache location (WebRTC binary)
+
+jobs:
+  # The app is also shipped for macOS, so make sure that platform keeps compiling.
+  macos-build:
+    name: macOS build
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-xcode
+        with:
+          spm-dir: ${{ env.SPM_DIR }}
+
+      - name: Build for macOS (unsigned)
+        run: |
+          xcodebuild build \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -destination 'platform=macOS' \
+            -clonedSourcePackagesDirPath "$SPM_DIR" \
+            -resultBundlePath build/macos-build.xcresult \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload build results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos-build-xcresult
+          path: build/macos-build.xcresult
+          if-no-files-found: ignore
+          retention-days: 7

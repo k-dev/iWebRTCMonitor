@@ -1,5 +1,9 @@
 # iWebRTCMonitor
 
+[![Repo check up](https://github.com/k-dev/iWebRTCMonitor/actions/workflows/checkup.yml/badge.svg?branch=main)](https://github.com/k-dev/iWebRTCMonitor/actions/workflows/checkup.yml)
+[![iOS tests](https://github.com/k-dev/iWebRTCMonitor/actions/workflows/ios-tests.yml/badge.svg?branch=main)](https://github.com/k-dev/iWebRTCMonitor/actions/workflows/ios-tests.yml)
+[![macOS build](https://github.com/k-dev/iWebRTCMonitor/actions/workflows/macos-build.yml/badge.svg?branch=main)](https://github.com/k-dev/iWebRTCMonitor/actions/workflows/macos-build.yml)
+
 **A peer-to-peer video monitor for iOS and macOS, built with SwiftUI and WebRTC.**
 One device streams live camera and audio, another watches it. Video goes directly between the devices; a small WebSocket server is only used to set up the connection.
 

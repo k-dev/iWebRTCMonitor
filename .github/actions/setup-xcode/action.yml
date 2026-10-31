@@ -1,0 +1,33 @@
+name: Set up Xcode
+description: Select the newest stable Xcode on the runner and restore the SwiftPM cache.
+
+inputs:
+  spm-dir:
+    description: SwiftPM checkout/cache location (WebRTC binary)
+    required: false
+    default: .spm
+
+runs:
+  using: composite
+  steps:
+    # No third-party action: pick the newest stable Xcode preinstalled on the runner.
+    - name: Select Xcode
+      shell: bash
+      run: |
+        XCODE=$(ls -d /Applications/Xcode_*.app 2>/dev/null | grep -viE 'beta|_rc|release_candidate' | sort -V | tail -n 1 || true)
+        if [ -n "$XCODE" ]; then
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+        fi
+        xcodebuild -version
+
+    - name: Show toolchain
+      shell: bash
+      run: swift --version
+
+    - name: Cache SwiftPM (WebRTC binary)
+      uses: actions/cache@v6
+      with:
+        path: ${{ inputs.spm-dir }}
+        key: spm-${{ runner.os }}-${{ hashFiles('**/project.pbxproj', '**/Package.resolved') }}
+        restore-keys: |
+          spm-${{ runner.os }}-

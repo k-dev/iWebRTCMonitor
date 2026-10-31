@@ -1,0 +1,91 @@
+name: iOS tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs of the same workflow on the same branch / PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# Project, scheme and test target are named after the repository,
+# so the same workflow works in every clone without edits.
+env:
+  PROJECT: ${{ github.event.repository.name }}.xcodeproj   # repo root = folder that contains the .xcodeproj
+  SCHEME: ${{ github.event.repository.name }}
+  TEST_TARGET: ${{ github.event.repository.name }}Tests
+  SPM_DIR: .spm                                            # SwiftPM checkout/cache location (WebRTC binary)
+
+jobs:
+  # Unit tests on an iOS Simulator. UI tests are skipped on purpose:
+  # they need camera/microphone and are not part of the CI contract.
+  ios-tests:
+    name: iOS build + unit tests
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-xcode
+        with:
+          spm-dir: ${{ env.SPM_DIR }}
+
+      # Do not hardcode a device name: available simulators differ between Xcode versions.
+      - name: Pick the newest available iPhone simulator
+        id: sim
+        run: |
+          UDID=$(python3 - <<'PY'
+          import json, re, subprocess, sys
+
+          devices = json.loads(subprocess.check_output(
+              ["xcrun", "simctl", "list", "devices", "available", "--json"]))["devices"]
+
+          best = None
+          for runtime, items in devices.items():
+              m = re.search(r"iOS-(\d+)-(\d+)", runtime)
+              if not m:
+                  continue
+              version = (int(m.group(1)), int(m.group(2)))
+              for d in items:
+                  if d["name"].startswith("iPhone") and (best is None or version > best[0]):
+                      best = (version, d["udid"], d["name"])
+
+          if best is None:
+              sys.exit("No iPhone simulator available")
+          print(f"Using {best[2]} (iOS {best[0][0]}.{best[0][1]})", file=sys.stderr)
+          print(best[1])
+          PY
+          )
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+
+      - name: Resolve packages
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project "$PROJECT" -scheme "$SCHEME" \
+            -clonedSourcePackagesDirPath "$SPM_DIR"
+
+      - name: Build and run unit tests
+        run: |
+          xcodebuild test \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -clonedSourcePackagesDirPath "$SPM_DIR" \
+            -only-testing:"$TEST_TARGET" \
+            -resultBundlePath build/ios-tests.xcresult \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-tests-xcresult
+          path: build/ios-tests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
